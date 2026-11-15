@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hilando Voces · Makipuray SJL</title>
+  <!-- Mapa gratuito Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Estilos separados (Tarea T2) -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <main class="phone-frame">
+    <header class="app-header">
+      <div class="logo-area" id="headerLogoClick" onclick="irAVista('panel')">
+        <div class="logo-circle">🧶</div>
+        <span class="app-title">Makipuray <small id="subtituloHeader">Hilando Voces · Lideresas SJL</small></span>
+      </div>
+      <button class="menu-btn" id="btnCerrarSesion" onclick="cerrarSesion()" title="Cerrar sesión" style="display: none;">Salir ✕</button>
+    </header>
+
+    <!-- VISTA 0: VERIFICACIÓN DE LIDERESA DE SJL (RF-1) -->
+    <section id="vista-login" class="vista active">
+      <div class="card-verificacion">
+        <span class="tag-sjl">🔒 App Privada · Solo Lideresas SJL</span>
+        <h1>Acceso de Lideresas</h1>
+        <p class="subtitle">Verifica tu identidad en el padrón de colectivos juveniles RENOJ de San Juan de Lurigancho (18 a 29 años).</p>
+        <form id="formLoginLideresa" onsubmit="verificarLideresa(event)">
+          <label for="lidNombre">Nombres y Apellidos de la Lideresa</label>
+          <input type="text" id="lidNombre" placeholder="Ej. Leyla Usca Chambi" required />
+          <div class="row-2">
+            <div>
+              <label for="lidDni">DNI (8 dígitos)</label>
+              <input type="text" id="lidDni" maxlength="8" pattern="\d{8}" placeholder="74859612" required />
+            </div>
+            <div>
+              <label for="lidEdad">Edad (18-29)</label>
+              <input type="number" id="lidEdad" min="18" max="29" placeholder="23" required />
+            </div>
+          </div>
+          <label for="lidZona">Organización RENOJ / Sector en SJL</label>
+          <select id="lidZona" required>
+            <option value="">Selecciona tu colectivo en SJL...</option>
+            <option value="J.C. Mariátegui - Jóvenes Líderes de Mariátegui SJL">Jóvenes Líderes de Mariátegui SJL (Mariátegui)</option>
+            <option value="Monteverde / Bayóvar - Junta Juvenil en defensa de Monteverde">Junta Juvenil en defensa de Monteverde (Bayóvar)</option>
+            <option value="Canto Grande - Asociación Cultural Kuyaykim Perú">Asociación Cultural Kuyaykim Perú (Canto Grande)</option>
+            <option value="La Huayrona - AMAAC PERU SJL">AMAAC PERU (La Huayrona - SJL)</option>
+            <option value="Zárate / Caja de Agua - COALE SJL">Comisión de Adolescentes Lima Este - COALE (Zárate)</option>
+          </select>
+          <div class="check-row">
+            <input type="checkbox" id="lidConfirmaSJL" required />
+            <label for="lidConfirmaSJL">Confirmo que soy lideresa acreditada y resido en San Juan de Lurigancho.</label>
+          </div>
+          <p id="errorLogin" class="error-msg" style="display: none;"></p>
+          <button type="submit" class="btn-primary">Verificar DNI e Ingresar</button>
+          <button type="button" class="btn-demo-fill" onclick="autocompletarLideresaDemo()">⚡ Autocompletar Lideresa RENOJ (Demo)</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- VISTA 1: PANEL PRINCIPAL (RF-2) -->
+    <section id="vista-panel" class="vista">
+      <div class="saludo-box">
+        <span class="verified-pill" id="badgeLideresaVerificada">✓ DNI Verificado · SJL</span>
+        <h1 id="textoSaludo">¡Hola, Lideresa!</h1>
+        <p>Gestiona los reportes del Formulario Vecinal y tus proyectos en SJL</p>
+      </div>
+      <div class="grid-botones-principales">
+        <button class="tile-btn tile-blue" onclick="irAVista('resumen')">
+          <span class="tile-icon">📊</span><span class="tile-label">Resumen</span><small>3 ejes y evidencias</small>
+        </button>
+        <button class="tile-btn tile-green" onclick="irAVista('mapa')">
+          <span class="tile-icon">📍</span><span class="tile-label">Mapa SJL</span><small>Leaflet + Rutas</small>
+        </button>
+        <button class="tile-btn tile-yellow" onclick="irAVista('proyectos')">
+          <span class="tile-icon">📁</span><span class="tile-label">Proyectos</span><small>Equipo, fotos y ruta</small>
+        </button>
+        <button class="tile-btn tile-purple" onclick="irAVista('config')">
+          <span class="tile-icon">🔗</span><span class="tile-label">Enlace Form</span><small>Formulario Vecinal</small>
+        </button>
+      </div>
+      <div class="comunidad-banner">
+        <div class="siluetas">👩‍🦱 👩 👩‍🦳 🙋‍♀️ 👩‍🦱</div>
+        <p class="lema-pill">Una comunidad informada, una comunidad más fuerte 🧶</p>
+      </div>
+    </section>
+
+    <!-- VISTA 2: RESUMEN GENERAL (RF-3) -->
+    <section id="vista-resumen" class="vista">
+      <div class="nav-back"><button class="btn-back" onclick="irAVista('panel')">← Volver al panel</button></div>
+      <h2 class="vista-titulo">Principales necesidades</h2>
+      <p class="vista-sub">Reportes recibidos desde el Formulario Web Vecinal (validados con DNI +18 en SJL):</p>
+      <div class="chart-card">
+        <div class="pie-chart" id="graficoTorta"></div>
+        <ul class="chart-legend">
+          <li><span class="dot dot-purple"></span><div><strong>Alumbrado y transitabilidad</strong><small id="statAlumbrado">48 reportes (40%)</small></div></li>
+          <li><span class="dot dot-pink"></span><div><strong>Microbasurales en esquinas</strong><small id="statBasura">42 reportes (35%)</small></div></li>
+          <li><span class="dot dot-yellow"></span><div><strong>Espacios recreativos</strong><small id="statEspacios">30 reportes (25%)</small></div></li>
+        </ul>
+      </div>
+      <div class="total-card">
+        <div>
+          <span class="total-label">Total de reportes en SJL</span>
+          <div class="total-number" id="numeroTotalReportes">120</div>
+          <small class="total-note">Enviados mediante el Formulario Vecinal con DNI</small>
+        </div>
+        <div class="trend-icon">📈</div>
+      </div>
+      <div class="recent-box">
+        <h3>Últimos reportes vecinales con foto (SJL)</h3>
+        <div id="listaUltimosReportes" class="recent-list"></div>
+      </div>
+    </section>
+
+    <!-- VISTA 3: MAPA INTERACTIVO LEAFLET DE SJL (RF-4) -->
+    <section id="vista-mapa" class="vista">
+      <div class="nav-back"><button class="btn-back" onclick="irAVista('panel')">← Volver al panel</button></div>
+      <h2 class="vista-titulo">Mapa Territorial SJL</h2>
+      <div class="map-toggle">
+        <button id="btnMapaNecesidades" class="toggle-pill active" onclick="cambiarCapaMapa('necesidades')">📍 Necesidades</button>
+        <button id="btnMapaLideresas" class="toggle-pill" onclick="cambiarCapaMapa('lideresas')">👩‍🦱 Lideresas</button>
+        <button id="btnMapaRutas" class="toggle-pill" onclick="cambiarCapaMapa('rutas')">🚩 Rutas Proy.</button>
+      </div>
+      <div id="mapaLeafletSJL"></div>
+      <div class="map-legend-box">
+        <span class="heat-dot"></span>
+        <span id="textoLeyendaMapa"><strong>Zona crítica SJL:</strong> J.C. Mariátegui y Canto Grande</span>
+      </div>
+      <div id="detalleMapaLista" class="map-cards-list"></div>
+    </section>
+
+    <!-- VISTA 4: PROYECTOS (RF-5) -->
+    <section id="vista-proyectos" class="vista">
+      <div class="nav-back"><button class="btn-back" onclick="irAVista('panel')">← Volver al panel</button></div>
+      <div class="proyectos-header">
+        <h2 class="vista-titulo">Mis proyectos en SJL</h2>
+        <button class="btn-add-mini" onclick="mostrarFormularioProyecto()">+ Nuevo proyecto</button>
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" onclick="filtrarProyectos('todos', this)">Todos</button>
+        <button class="chip" onclick="filtrarProyectos('En proceso', this)">En proceso</button>
+        <button class="chip" onclick="filtrarProyectos('Propuesta', this)">Propuesta</button>
+        <button class="chip" onclick="filtrarProyectos('Realizado', this)">Realizados</button>
+      </div>
+
+      <form id="formNuevoProyecto" class="nuevo-proyecto-box" style="display: none;" onsubmit="guardarNuevoProyecto(event)">
+        <h4>Registrar proyecto comunitario</h4>
+        <label>Título del proyecto</label>
+        <input type="text" id="proyTitulo" placeholder="Ej. Iluminación peatonal Pasaje 4" required />
+        <label>Eje prioritario</label>
+        <select id="proyEje" required>
+          <option value="Alumbrado y transitabilidad">💡 Alumbrado y transitabilidad</option>
+          <option value="Erradicación de microbasurales">🗑️ Erradicación de microbasurales</option>
+          <option value="Recuperación de espacios recreativos">🌳 Recuperación de espacios recreativos</option>
+        </select>
+        <div class="row-2">
+          <div>
+            <label>Estado</label>
+            <select id="proyEstado" required>
+              <option value="En proceso">En proceso</option>
+              <option value="Propuesta">Propuesta</option>
+              <option value="Realizado">Realizado</option>
+            </select>
+          </div>
+          <div>
+            <label>Sector en SJL</label>
+            <select id="proyZona" required>
+              <option value="J.C. Mariátegui">J.C. Mariátegui</option>
+              <option value="Monteverde / Bayóvar">Monteverde / Bayóvar</option>
+              <option value="Canto Grande">Canto Grande</option>
+              <option value="La Huayrona">La Huayrona</option>
+              <option value="Zárate / Caja de Agua">Zárate / Caja de Agua</option>
+            </select>
+          </div>
+        </div>
+
+        <label>🚩 Ruta del proyecto (Etapas y recorrido en SJL)</label>
+        <input type="text" id="proyRuta" placeholder="Ej. Etapa 1: Empadronamiento → Etapa 2: Faena → Etapa 3: Mesa municipal" required />
+
+        <label>🤝 Colaboradores verificados (Nombre + DNI 8 dígitos)</label>
+        <div class="colab-box">
+          <div class="row-2">
+            <input type="text" id="colabNombreInput" placeholder="Nombre colaborador(a)" />
+            <input type="text" id="colabDniInput" maxlength="8" placeholder="DNI (8 dígitos)" />
+          </div>
+          <button type="button" class="btn-demo-fill" onclick="agregarColaboradorTemporal()">+ Añadir colaborador al proyecto</button>
+          <div id="listaColabTemporal"></div>
+        </div>
+
+        <label>📷 Fotografía del proyecto (antes / avance / logro)</label>
+        <input type="file" id="proyFotoInput" accept="image/*" />
+
+        <label>Descripción del avance</label>
+        <textarea id="proyDesc" rows="2" placeholder="¿Qué se está logrando con los vecinos?" required></textarea>
+        <button type="submit" class="btn-primary">Guardar proyecto completo</button>
+      </form>
+
+      <div id="listaProyectos" class="proyectos-list"></div>
+    </section>
+
+    <!-- VISTA 5: CONFIGURACIÓN Y ENLACE DEL FORMULARIO VECINAL -->
+    <section id="vista-config" class="vista">
+      <div class="nav-back"><button class="btn-back" onclick="irAVista('panel')">← Volver al panel</button></div>
+      <h2 class="vista-titulo">Formulario Vecinal y Red</h2>
+      <div class="config-card">
+        <h3>👩‍🦱 Lideresa en sesión (Vista Privada)</h3>
+        <p id="perfilDatosLideresa">Cargando datos...</p>
+        <hr />
+        <h3>📝 Enlace Público del Formulario Vecinal</h3>
+        <p>Los vecinos de SJL no tienen acceso a esta app. Ellos solo ven el <strong>Formulario Web de Reporte</strong> mediante este enlace único:</p>
+        <div class="link-box" id="urlFormularioVecino"></div>
+        <button class="btn-secondary" onclick="copiarLinkFormulario()">📋 Copiar enlace del Formulario Vecinal</button>
+        <button class="btn-demo-fill" onclick="abrirVistaPreviaFormularioVecino()">👁️ Probar vista exclusiva del Vecino (Solo Form)</button>
+        <p id="msgCopiado" class="success-msg" style="display: none;"></p>
+        <hr />
+        <button class="btn-outline-danger" onclick="cerrarSesion()">Cerrar sesión de lideresa</button>
+      </div>
+    </section>
+
+    <!-- VISTA EXCLUSIVA DEL VECINO: SOLO FORMULARIO (RF-6) -->
+    <section id="vista-vecino" class="vista">
+      <div class="card-verificacion vecino-theme">
+        <span class="tag-sjl">📝 Formulario Oficial para Vecinos · SJL</span>
+        <h1>Reportar Necesidad en tu Barrio</h1>
+        <p class="subtitle">Formulario exclusivo para residentes de San Juan de Lurigancho mayores de 18 años. Tu reporte llegará directamente al sistema de las lideresas de tu zona.</p>
+        <form id="formReporteVecino" onsubmit="enviarReporteVecino(event)">
+          <label for="vecNombre">Nombre y Apellido del vecino(a)</label>
+          <input type="text" id="vecNombre" placeholder="Ej. Carlos Mendoza Rojas" required />
+          <div class="row-2">
+            <div>
+              <label for="vecDni">DNI (8 dígitos)</label>
+              <input type="text" id="vecDni" maxlength="8" pattern="\d{8}" placeholder="45896321" required />
+            </div>
+            <div>
+              <label for="vecEdad">Edad (+18 años)</label>
+              <input type="number" id="vecEdad" min="18" max="110" placeholder="34" required />
+            </div>
+          </div>
+          <label for="vecZona">Sector de San Juan de Lurigancho</label>
+          <select id="vecZona" required>
+            <option value="">Selecciona tu sector en SJL...</option>
+            <option value="J.C. Mariátegui">José Carlos Mariátegui</option>
+            <option value="Monteverde / Bayóvar">Monteverde / Bayóvar</option>
+            <option value="Canto Grande">Canto Grande</option>
+            <option value="La Huayrona">La Huayrona</option>
+            <option value="Zárate / Caja de Agua">Zárate / Caja de Agua</option>
+          </select>
+          <label for="vecEje">Problemática prioritaria (3 ejes fijos)</label>
+          <select id="vecEje" required>
+            <option value="Alumbrado y transitabilidad">💡 Alumbrado y transitabilidad</option>
+            <option value="Erradicación de microbasurales">🗑️ Erradicación de microbasurales</option>
+            <option value="Recuperación de espacios recreativos">🌳 Recuperación de espacios recreativos</option>
+          </select>
+          <label for="vecDetalle">Descripción y ubicación de referencia</label>
+          <textarea id="vecDetalle" rows="2" placeholder="Ej. Postes apagados frente a la losa deportiva..." required></textarea>
+
+          <label for="vecFotoInput">📷 Subir foto de evidencia (opcional)</label>
+          <input type="file" id="vecFotoInput" accept="image/*" />
+
+          <div class="check-row">
+            <input type="checkbox" id="vecConfirmaSJL" required />
+            <label for="vecConfirmaSJL">Declaro ser mayor de 18 años y residir en San Juan de Lurigancho.</label>
+          </div>
+          <p id="mensajeExitoVecino" class="success-msg" style="display: none;"></p>
+          <button type="submit" class="btn-primary">Enviar formulario de reporte</button>
+          <button type="button" id="btnVolverModoLideresa" class="btn-demo-fill" style="display: none;" onclick="salirVistaPreviaVecino()">🔒 Volver a la App de Lideresa (Solo visible en prueba)</button>
+        </form>
+      </div>
+    </section>
+
+    <nav class="bottom-nav" id="barraInferiorLideresa" style="display: none;">
+      <button onclick="irAVista('panel')" id="nav-panel" class="nav-item active">🏠<span>Inicio</span></button>
+      <button onclick="irAVista('resumen')" id="nav-resumen" class="nav-item">📊<span>Resumen</span></button>
+      <button onclick="irAVista('mapa')" id="nav-mapa" class="nav-item">📍<span>Mapa SJL</span></button>
+      <button onclick="irAVista('proyectos')" id="nav-proyectos" class="nav-item">📁<span>Proyectos</span></button>
+    </nav>
+  </main>
+
+  <!-- Datos y Backend Local (Tarea T1) + Lógica Frontend (Tareas T3 y T4) -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
