@@ -48,7 +48,24 @@
             <option value="Canto Grande - Asociación Cultural Kuyaykim Perú">Asociación Cultural Kuyaykim Perú (Canto Grande)</option>
             <option value="La Huayrona - AMAAC PERU SJL">AMAAC PERU (La Huayrona - SJL)</option>
             <option value="Zárate / Caja de Agua - COALE SJL">Comisión de Adolescentes Lima Este - COALE (Zárate)</option>
+            <option id="optOtra" value="otra">➕ Mi organización no está en la lista</option>
           </select>
+
+          <!-- Registro manual de organización (si no está en la lista) -->
+          <div id="lidOtraBox" style="display: none;">
+            <label for="lidOtraNombre">Nombre de tu organización o colectivo</label>
+            <input type="text" id="lidOtraNombre" placeholder="Ej. Colectivo Mujeres Tejiendo Futuro" />
+            <label for="lidOtraSector">Sector en SJL</label>
+            <select id="lidOtraSector">
+              <option value="">Selecciona tu sector...</option>
+              <option value="J.C. Mariátegui">J.C. Mariátegui</option>
+              <option value="Monteverde / Bayóvar">Monteverde / Bayóvar</option>
+              <option value="Canto Grande">Canto Grande</option>
+              <option value="La Huayrona">La Huayrona</option>
+              <option value="Zárate / Caja de Agua">Zárate / Caja de Agua</option>
+            </select>
+          </div>
+
           <div class="check-row">
             <input type="checkbox" id="lidConfirmaSJL" required />
             <label for="lidConfirmaSJL">Confirmo que soy lideresa acreditada y resido en San Juan de Lurigancho.</label>
@@ -281,5 +298,28 @@
   <!-- Datos y Backend Local (Tarea T1) + Lógica Frontend (Tareas T3 y T4) -->
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- Registro manual de organización de la lideresa -->
+  <script>
+  (function () {
+    const sel = document.getElementById('lidZona');
+    const box = document.getElementById('lidOtraBox');
+    const nom = document.getElementById('lidOtraNombre');
+    const sec = document.getElementById('lidOtraSector');
+    const opt = document.getElementById('optOtra');
+    function actualizar() {
+      const esOtra = sel.selectedOptions[0] === opt;
+      box.style.display = esOtra ? 'block' : 'none';
+      nom.required = esOtra;
+      sec.required = esOtra;
+      if (esOtra) {
+        opt.value = (sec.value && nom.value.trim()) ? sec.value + ' - ' + nom.value.trim() : 'otra';
+      }
+    }
+    sel.addEventListener('change', actualizar);
+    nom.addEventListener('input', actualizar);
+    sec.addEventListener('change', actualizar);
+  })();
+  </script>
 </body>
 </html>
